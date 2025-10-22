@@ -10,7 +10,9 @@ const propertyController = require("./controllers/propertyController");
 const uploadController = require("./controllers/uploadController");
 const statusText = require("./utilites/statusText");
 
+//mongo connect  we have 2 lines missing ??
 db();
+app.use("/images",express.static("public/images"));
 
 // routes and middleware
 app.use(cors());

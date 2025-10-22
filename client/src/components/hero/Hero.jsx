@@ -7,6 +7,11 @@ const Hero = () => {
   const [type, setType] = useState("beach")
   const [continent, setContinent] = useState("0")
   const [priceRange, setPriceRange] = useState("0")
+  const navigate=useNavigate()
+  const handleSearch=()=>{
+    // navigate to properties
+    navigate(`/properties?type=${type}&continent=${continent}&priceRange=${priceRange}`)
+  }
 
   return (
     <div className={classes.container}>
@@ -40,7 +45,7 @@ const Hero = () => {
    <option value="4">North America</option>
    <option value="5">Oceania</option>
  </select>
- <AiOutlineSearch className={classes.searchIcon}/>
+ <AiOutlineSearch onClick={handleSearch} className={classes.searchIcon}/>
 </div>
 
 </div>
