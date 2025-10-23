@@ -376,3 +376,37 @@ a {
         width: 150px;
     }
 }
+/* RESPONSIVE */
+
+@media only screen and (max-width: 992px) {
+    .left {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .left>img {
+        width: 90%;
+        height: 75%;
+    }
+
+    .right {
+        width: 90%;
+    }
+
+    .contactFormWrapper {
+        height: 75vh;
+        width: 35vw;
+    }
+}
+
+
+@media only screen and (max-width: 768px) {
+    .contactFormWrapper {
+        height: 75vh;
+        width: 50vw;
+    }
+
+    .contactOwner {
+        width: 150px;
+    }
+}
