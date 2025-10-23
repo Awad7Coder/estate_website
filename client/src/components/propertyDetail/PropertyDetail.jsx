@@ -11,7 +11,7 @@ import { request } from '../../util/fetchAPI'
 import { FaBed, FaSquareFull } from 'react-icons/fa'
 import { BsBookmark, BsFillBookmarkFill } from 'react-icons/bs'
 import { useRef } from 'react'
-import Comment from '../comment/Comment'
+import Comment from 'components/comment/Comment'
 
 const PropertyDetail = () => {
   const { token, user } = useSelector((state) => state.auth)
@@ -22,7 +22,7 @@ const PropertyDetail = () => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [success, setSuccess] = useState(false)
   const [commentText, setCommentText] = useState('')
-  const [comments, setComments] = useState([])
+   const [comments, setComments] = useState([])
   // todo display message
   const [shortComment, setShortComment] = useState(false)
   const { id } = useParams()
@@ -63,16 +63,16 @@ const PropertyDetail = () => {
   const handleContactOwner = async (e) => {
     e.preventDefault()
 
-    // emailjs.sendForm("service_mjoebse", "template_w5mthmm", formRef.current, '5T3Wb_hkHjKTOJDYQ')
-    //   .then((result) => {
-    //     handleCloseForm()
-    //     setSuccess(true)
-    //     setTimeout(() => {
-    //       setSuccess(false)
-    //     }, 2500)
-    //   }, (error) => {
-    //     console.log(error.text);
-    //   });
+     emailjs.sendForm("service_mjoebse", "template_w5mthmm", formRef.current, '5T3Wb_hkHjKTOJDYQ')
+     .then((result) => {
+         handleCloseForm()
+         setSuccess(true)
+         setTimeout(() => {
+           setSuccess(false)
+         }, 2500)
+       }, (error) => {
+         console.log(error.text);
+       });
   }
 
   const handleDelete = async () => {
