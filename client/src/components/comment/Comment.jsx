@@ -1,11 +1,10 @@
 import React from 'react'
-import classes from './comment.module.css'
 import { format } from 'timeago.js'
 import { useSelector } from 'react-redux'
 import { BsTrash } from 'react-icons/bs'
 import { request } from '../../util/fetchAPI'
 import person from '../../assets/person.jpg'
-
+ import classes from './comment.module.css'
 const Comment = ({ comment, setComments }) => {
   const { user, token } = useSelector((state) => state.auth)
 
