@@ -35,24 +35,59 @@ const Navbar = () => {
   const handleListProperty = async (e) => {
     e.preventDefault();
 
-    let filename = null;
-    if (photo) {
-      const formData = new FormData();
-      filename = crypto.randomUUID() + photo.name;
-      formData.append("filename", filename);
-      formData.append("image", photo);
-
-      await request("/upload/image", "POST", {}, formData, true);
-    } else return;
+    // Check if all required fields are filled
+    const requiredFields = [
+      "title",
+      "type",
+      "desc",
+      "price",
+      "sqmeters",
+      "continent",
+      "beds",
+    ];
+    if (requiredFields.some((field) => !state[field]) || !photo) {
+      setTimeout(() => {}, 2500);
+      return;
+    }
 
     try {
-      const options = {
-        Authorization: `Bearer ${token}`,
+      let filename = null;
+      if (photo) {
+        const formData = new FormData();
+        formData.append("image", photo);
+
+        const uploadResponse = await fetch(
+          `http://localhost:5000/upload/image`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!uploadResponse.ok) {
+          throw new Error("Image upload failed");
+        }
+
+        const uploadData = await uploadResponse.json();
+        filename = uploadData.filename;
+      }
+
+      // Make sure to include the Authorization header
+      const headers = {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Add this line
       };
-      await request("/property", "POST", options, { ...state, img: filename });
+
+      const data = await request(`/property`, "POST", headers, {
+        ...state,
+        img: filename, // Make sure this matches your Property model field name
+      });
+
+      console.log("Property created:", data);
+      // Handle success (redirect or show message)
     } catch (error) {
-      console.log(error);
+      setTimeout(() => {}, 2000);
+      console.error("Property creation error:", error);
     }
   };
 

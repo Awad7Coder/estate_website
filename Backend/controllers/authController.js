@@ -9,33 +9,47 @@ const { json } = require("express");
 
 authController.post(
   "/register",
-  asyncFn(async (req, res,next) => {
-    const isExisting = await User.findOne({ email: req.body.email });
-    if (isExisting) {
-      const error = AppError.create(
-        "Email already exists",
-        401,
-        statusText.FAIL
-      );
-      return next(error);
+  asyncFn(async (req, res, next) => {
+    try {
+      console.log("Registration request body:", req.body);
+      const JWT_SECRET = process.env.JWT_SECRET;
+
+      const isExisting = await User.findOne({ email: req.body.email });
+      if (isExisting) {
+        const error = AppError.create(
+          "Email already exists",
+          401,
+          statusText.FAIL
+        );
+        return next(error);
+      }
+
+      const hashPassword = await bcrypt.hash(req.body.password, 10);
+
+      const newuser = await User.create({
+        ...req.body,
+        password: hashPassword,
+      });
+
+      console.log("User created:", newuser);
+
+      const { password, ...others } = newuser.toObject();
+      const token = jwt.sign({ id: newuser._id }, JWT_SECRET, {
+        expiresIn: "4h",
+      });
+
+      return res.status(201).json({ others, token });
+    } catch (error) {
+      console.error("Registration error:", error);
+      next(error);
     }
-
-    const hashPassword = await bcrypt.hash(req.body.password, 10);
-
-    const newuser = await User.create({ ...req.body, password: hashPassword });
-
-    const { password, ...others } = newuser.toObject();
-    const token = jwt.sign({ id: newuser._id }, process.env.JWT_SECERT, {
-      expiresIn: "4h",
-    });
-
-    return res.status(201).json({ others, token });
   })
 );
 
 authController.post(
   "/login",
-  asyncFn(async (req, res,next) => {
+  asyncFn(async (req, res, next) => {
+    const JWT_SECRET = process.env.JWT_SECRET;
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       const error = AppError.create("User is not exist", 401, statusText.FAIL);
@@ -53,13 +67,13 @@ authController.post(
       return next(error);
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECERT, {
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
       expiresIn: "4h",
     });
 
-    const {password,...others} = user._doc;
+    const { password, ...others } = user._doc;
 
-    return res.status(200).json({others,token})
+    return res.status(200).json({ others, token });
   })
 );
 

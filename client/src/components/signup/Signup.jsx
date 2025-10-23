@@ -1,14 +1,23 @@
 import React from "react";
-import classes from "./signup.module.css";
+import { useState } from "react";
 import { AiOutlineFileImage } from "react-icons/ai";
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import classes from "./signup.module.css";
+import { register } from "../../redux/authSlice";
 import { request } from "../../util/fetchAPI";
 
 const Signup = () => {
-  const [state, setState] = useState({});
+  const [state, setState] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [photo, setPhoto] = useState("");
-  // const dispatch = useDispatch();
+  const [error, setError] = useState(false);
+  const [emptyFields, setEmptyFields] = useState(false);
+  const { token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleState = (e) => {
@@ -17,31 +26,60 @@ const Signup = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+
+    // Check if all required fields are filled
+    const requiredFields = ["username", "email", "password"];
+    if (requiredFields.some((field) => !state[field]) || !photo) {
+      setEmptyFields(true);
+      setTimeout(() => {
+        setEmptyFields(false);
+      }, 2500);
+      return;
+    }
+
     try {
       let filename = null;
       if (photo) {
         const formData = new FormData();
-        filename = crypto.randomUUID() + photo.name;
-        formData.append("filename", filename);
+        // Remove the filename append - just send the image
         formData.append("image", photo);
-        await request("/upload/image", "POST", {}, formData, true);
-      } else {
-        return;
+
+        const uploadResponse = await fetch(
+          `http://localhost:5000/upload/image`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!uploadResponse.ok) {
+          throw new Error("Image upload failed");
+        }
+
+        const uploadData = await uploadResponse.json();
+        filename = uploadData.filename; // Get filename from response
       }
 
       const headers = {
         "Content-Type": "application/json",
       };
-      const data = await request("/auth/image", "POST", headers, {
+
+      // Use the correct field name that matches your User model
+      const data = await request(`/auth/register`, "POST", headers, {
         ...state,
-        profileImg: filename,
+        imageProfile: filename, // Changed from profileImg to imageProfile
       });
-      // dispatch();
+
+      dispatch(register(data));
       navigate("/");
     } catch (error) {
-      console.error(error);
+      setError(true);
+      setTimeout(() => {
+        setError(false);
+      }, 2000);
+      console.error("Registration error:", error);
     }
   };
 
@@ -49,7 +87,7 @@ const Signup = () => {
     <div className={classes.container}>
       <div className={classes.wrapper}>
         <h2>Sign Up</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleRegister}>
           <input
             type="text"
             name="username"
@@ -57,7 +95,7 @@ const Signup = () => {
             onChange={handleState}
           />
           <input
-            type="email"
+            type="text"
             name="email"
             placeholder="Email..."
             onChange={handleState}
@@ -66,9 +104,9 @@ const Signup = () => {
             Upload photo <AiOutlineFileImage />
           </label>
           <input
-            type="file"
-            id="photo"
             style={{ display: "none" }}
+            id="photo"
+            type="file"
             onChange={(e) => setPhoto(e.target.files[0])}
           />
           <input
@@ -79,9 +117,15 @@ const Signup = () => {
           />
           <button type="submit">Register</button>
           <p>
-            Already have an account? <Link to="/signin">Sign in</Link>
+            Already have an account? <Link to="/signin">Login</Link>
           </p>
         </form>
+        {error && (
+          <div className={classes.error}>
+            There was an error signing up! Try again.
+          </div>
+        )}
+        {emptyFields && <div className={classes.error}>Fill all fields!</div>}
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 const express = require("express");
-const mongoose = require("mongoose");
 require("dotenv").config();
 const cors = require("cors");
 const app = express();
 const path = require("path");
 const db = require("./config/db");
+const morgan = require("morgan");
 const authController = require("./controllers/authController");
 const propertyController = require("./controllers/propertyController");
 const uploadController = require("./controllers/uploadController");
@@ -12,15 +12,16 @@ const statusText = require("./utilites/statusText");
 
 //mongo connect  we have 2 lines missing ??
 db();
-app.use("/images",express.static("public/images"));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // routes and middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan("dev"));
 app.use("/auth", authController);
 app.use("/property", propertyController);
 app.use("/upload", uploadController);
-const uploadPath = path.join(__dirname, "../images");
+// const uploadPath = path.join(__dirname, "../images");
 
 app.use((req, res) => {
   // console.log(`404 Error: ${req.method} ${req.originalUrl}`);
