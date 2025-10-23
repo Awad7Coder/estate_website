@@ -11,7 +11,7 @@ import { request } from '../../util/fetchAPI'
 import { FaBed, FaSquareFull } from 'react-icons/fa'
 import { BsBookmark, BsFillBookmarkFill } from 'react-icons/bs'
 import { useRef } from 'react'
-import Comment from 'components/comment/Comment'
+import Comment from '../comment/Comment'
 
 const PropertyDetail = () => {
   const { token, user } = useSelector((state) => state.auth)
